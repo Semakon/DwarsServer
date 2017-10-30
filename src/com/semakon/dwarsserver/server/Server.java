@@ -9,7 +9,6 @@ import com.semakon.dwarsserver.protocol.Message;
 import com.semakon.dwarsserver.protocol.MessageType;
 import com.semakon.dwarsserver.view.ServerTextView;
 import com.semakon.dwarsserver.view.ServerView;
-import com.sun.javafx.beans.annotations.NonNull;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -143,7 +142,7 @@ public class Server {
      * @param username the username to be validated.
      * @throws InvalidUsernameException when the username is not valid.
      */
-    public void validateUsername(@NonNull String username) throws InvalidUsernameException {
+    public void validateUsername(String username) throws InvalidUsernameException {
         // Utils.MIN_CHAR <= length <= Utils.MAX_CHAR
         if (username.length() < Utils.MIN_CHAR || username.length() > Utils.MAX_CHAR) {
             throw new InvalidUsernameException("Username should be between "
@@ -167,7 +166,7 @@ public class Server {
      * @return the ClientHandler whose username corresponds to the given String, <code>null</code> if
      * there is no such ClientHandler.
      */
-    private ClientHandler getFromString(@NonNull String username) {
+    private ClientHandler getFromString(String username) {
         lock.readLock().lock();
         try {
             for (ClientHandler ch : clientHandlers) {
