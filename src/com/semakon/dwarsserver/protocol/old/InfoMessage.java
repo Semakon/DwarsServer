@@ -1,4 +1,4 @@
-package com.semakon.dwarsserver.protocol;
+package com.semakon.dwarsserver.protocol.old;
 
 import java.util.Arrays;
 

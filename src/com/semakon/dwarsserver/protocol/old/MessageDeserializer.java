@@ -1,4 +1,4 @@
-package com.semakon.dwarsserver.protocol;
+package com.semakon.dwarsserver.protocol.old;
 
 import com.google.gson.*;
 
@@ -23,10 +23,7 @@ public class MessageDeserializer implements JsonDeserializer<Message> {
         final JsonObject jsonObject = json.getAsJsonObject();
 
         final String jsonType = jsonObject.get("type").getAsString();
-        final MessageType type = MessageType.getFromString(jsonType);
-        if (type == null) {
-            throw new JsonParseException("Message type \"" + jsonType + "\" is undefined");
-        }
+        final MessageType type = MessageType.valueOf(jsonType);
 
         Message msg;
         switch (type) {

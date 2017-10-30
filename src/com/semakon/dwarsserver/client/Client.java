@@ -3,8 +3,7 @@ package com.semakon.dwarsserver.client;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.semakon.dwarsserver.Utils;
-import com.semakon.dwarsserver.protocol.*;
-import com.semakon.dwarsserver.view.ClientView;
+import com.semakon.dwarsserver.protocol.old.*;
 import com.semakon.dwarsserver.view.ClientTextView;
 
 import java.io.BufferedReader;

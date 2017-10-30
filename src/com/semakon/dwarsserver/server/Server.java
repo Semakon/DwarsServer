@@ -3,10 +3,10 @@ package com.semakon.dwarsserver.server;
 import com.semakon.dwarsserver.Utils;
 import com.semakon.dwarsserver.exceptions.InvalidUsernameException;
 import com.semakon.dwarsserver.exceptions.SendingMessageException;
-import com.semakon.dwarsserver.protocol.Info;
-import com.semakon.dwarsserver.protocol.InfoMessage;
-import com.semakon.dwarsserver.protocol.Message;
-import com.semakon.dwarsserver.protocol.MessageType;
+import com.semakon.dwarsserver.protocol.old.Info;
+import com.semakon.dwarsserver.protocol.old.InfoMessage;
+import com.semakon.dwarsserver.protocol.old.Message;
+import com.semakon.dwarsserver.protocol.old.MessageType;
 import com.semakon.dwarsserver.view.ServerTextView;
 import com.semakon.dwarsserver.view.ServerView;
 

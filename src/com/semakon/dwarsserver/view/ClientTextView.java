@@ -1,9 +1,8 @@
 package com.semakon.dwarsserver.view;
 
 import com.semakon.dwarsserver.client.Client;
-import com.semakon.dwarsserver.protocol.*;
+import com.semakon.dwarsserver.protocol.old.*;
 
-import java.util.Arrays;
 import java.util.Scanner;
 
 /**

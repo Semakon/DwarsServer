@@ -1,23 +1,21 @@
-package com.semakon.dwarsserver.protocol;
+package com.semakon.dwarsserver.protocol.old;
 
 /**
  * Author:  M.P. de Vries
  * Date:    27-10-2017
  */
-public class PersonalMessage extends Message {
+public class BroadcastMessage extends Message {
 
     private String sender;
-    private String recipient;
     private String message;
 
-    public PersonalMessage(MessageType type) {
+    public BroadcastMessage(MessageType type) {
         super(type);
     }
 
-    public PersonalMessage(MessageType type, String sender, String recipient, String message) {
+    public BroadcastMessage(MessageType type, String sender, String message) {
         super(type);
         this.sender = sender;
-        this.recipient = recipient;
         this.message = message;
     }
 
@@ -27,14 +25,6 @@ public class PersonalMessage extends Message {
 
     public void setSender(String sender) {
         this.sender = sender;
-    }
-
-    public String getRecipient() {
-        return recipient;
-    }
-
-    public void setRecipient(String recipient) {
-        this.recipient = recipient;
     }
 
     public String getMessage() {
@@ -47,7 +37,7 @@ public class PersonalMessage extends Message {
 
     @Override
     public String toString() {
-        return sender + " sent \"" + message + "\" to " + recipient;
+        return sender + " broadcasted \"" + message + "\"";
     }
 
 }

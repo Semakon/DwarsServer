@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.semakon.dwarsserver.exceptions.InvalidUsernameException;
 import com.semakon.dwarsserver.exceptions.SendingMessageException;
-import com.semakon.dwarsserver.protocol.*;
+import com.semakon.dwarsserver.protocol.old.*;
 
 import java.io.*;
 import java.net.Socket;

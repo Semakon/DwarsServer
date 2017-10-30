@@ -1,23 +1,13 @@
-package com.semakon.dwarsserver.protocol;
+package com.semakon.dwarsserver;
 
 /**
  * Author:  M.P. de Vries
- * Date:    27-10-2017
+ * Date:    30-10-2017
  */
-public class BroadcastMessage extends Message {
+public class TestMessage {
 
     private String sender;
     private String message;
-
-    public BroadcastMessage(MessageType type) {
-        super(type);
-    }
-
-    public BroadcastMessage(MessageType type, String sender, String message) {
-        super(type);
-        this.sender = sender;
-        this.message = message;
-    }
 
     public String getSender() {
         return sender;
@@ -37,7 +27,7 @@ public class BroadcastMessage extends Message {
 
     @Override
     public String toString() {
-        return sender + " broadcasted \"" + message + "\"";
+        return sender + ": " + message;
     }
 
 }

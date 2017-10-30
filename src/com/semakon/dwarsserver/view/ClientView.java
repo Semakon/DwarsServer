@@ -1,8 +1,7 @@
 package com.semakon.dwarsserver.view;
 
-import com.semakon.dwarsserver.protocol.BroadcastMessage;
-import com.semakon.dwarsserver.protocol.Message;
-import com.semakon.dwarsserver.protocol.PersonalMessage;
+import com.semakon.dwarsserver.protocol.old.BroadcastMessage;
+import com.semakon.dwarsserver.protocol.old.PersonalMessage;
 
 /**
  * Author:  M.P. de Vries
