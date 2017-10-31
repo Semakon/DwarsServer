@@ -13,10 +13,12 @@ import java.util.List;
  */
 public class RankingList {
 
+    private int rlid;
     private String name;
     private List<Ranking> rankings;
 
-    public RankingList(String name) {
+    public RankingList(int rlid, String name) {
+        this.rlid = rlid;
         this.name = name;
         rankings = new ArrayList<>();
     }
@@ -89,6 +91,14 @@ public class RankingList {
      */
     public void removeRanking(Ranking ranking) {
         rankings.remove(ranking);
+    }
+
+    public int getRlid() {
+        return rlid;
+    }
+
+    public void setRlid(int rlid) {
+        this.rlid = rlid;
     }
 
     public String getName() {

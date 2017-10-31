@@ -7,6 +7,7 @@ import com.semakon.dwarsserver.protocol.old.Info;
 import com.semakon.dwarsserver.protocol.old.InfoMessage;
 import com.semakon.dwarsserver.protocol.old.Message;
 import com.semakon.dwarsserver.protocol.old.MessageType;
+import com.semakon.dwarsserver.protocol.server.ServerMessage;
 import com.semakon.dwarsserver.view.ServerTextView;
 import com.semakon.dwarsserver.view.ServerView;
 
@@ -25,20 +26,20 @@ import java.util.regex.Pattern;
  * Author:  M.P. de Vries
  * Date:    27-10-2017
  */
-public class Server {
+public class DwarsServer {
 
     private int port;
     private ServerSocket serverSocket;
 
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private List<ClientHandlerOld> clientHandlerOlds;
+    private List<ClientHandler> clientHandlers;
 
     private ServerView view;
 
-    public Server(int port) {
+    public DwarsServer(int port) {
         this.port = port;
-        clientHandlerOlds = new ArrayList<>();
+        clientHandlers = new ArrayList<>();
         view = new ServerTextView();
     }
 
@@ -56,13 +57,12 @@ public class Server {
         try {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                ClientHandlerOld gch = new ClientHandlerOld(clientSocket.getLocalPort(), // TODO: replace uuid
-                        this, clientSocket);
-                gch.start();
+                ClientHandler ch = new ClientHandler(this, clientSocket);
+                ch.start();
 
                 lock.writeLock().lock();
                 try {
-                    clientHandlerOlds.add(gch);
+                    clientHandlers.add(ch);
                 } finally {
                     lock.writeLock().unlock();
                 }
@@ -75,16 +75,16 @@ public class Server {
     }
 
     /**
-     * Sends a Message to all clients.
-     * @param msg The Message sent.
-     * @throws SendingMessageException when an error in sending the Message occurs.
+     * Sends a ServerMessage to all clients.
+     * @param msg The ServerMessage sent.
+     * @throws SendingMessageException when an error in sending the ServerMessage occurs.
      */
-    public void sendToAll(Message msg) throws SendingMessageException {
+    public void sendToAll(ServerMessage msg) throws SendingMessageException {
         lock.readLock().lock();
         try {
-            ListIterator<ClientHandlerOld> iter = clientHandlerOlds.listIterator();
+            ListIterator<ClientHandler> iter = clientHandlers.listIterator();
             while (iter.hasNext()) {
-                ClientHandlerOld ch = iter.next();
+                ClientHandler ch = iter.next();
                 if (ch == null) {
                     view.displayError("Empty ClientHandlerOld found, removing...");
                     iter.remove();
@@ -100,12 +100,12 @@ public class Server {
     }
 
     /**
-     * Sends a Message object to a specific client.
+     * Sends a ServerMessage object to a specific client.
      * @param recipient the recipient of the message.
-     * @param msg the Message sent to the client.
-     * @throws SendingMessageException when an error in sending the Message occurs.
+     * @param msg the ServerMessage sent to the client.
+     * @throws SendingMessageException when an error in sending the ServerMessage occurs.
      */
-    public void sendToClient(ClientHandlerOld recipient, Message msg)
+    public void sendToClient(ClientHandler recipient, ServerMessage msg)
             throws SendingMessageException {
         if (msg.getType() == null) {
             view.displayError("Error sending message - Message type is not defined");
@@ -113,7 +113,7 @@ public class Server {
         }
         lock.readLock().lock();
         try {
-            if (recipient == null || !clientHandlerOlds.contains(recipient)) {
+            if (recipient == null || !clientHandlers.contains(recipient)) {
                 view.displayError("Error sending message - Recipient does not exist");
                 throw new SendingMessageException("Recipient does not exist");
             }
@@ -125,12 +125,12 @@ public class Server {
     }
 
     /**
-     * Sends a Message object to a specific client.
-     * @param recipient the recipient of the message.
-     * @param msg the Message sent to the client.
-     * @throws SendingMessageException when an error in sending the Message occurs.
+     * Sends a ServerMessage object to a specific client.
+     * @param recipient the recipient of the ServerMessage.
+     * @param msg the ServerMessage sent to the client.
+     * @throws SendingMessageException when an error in sending the ServerMessage occurs.
      */
-    public void sendToClient(String recipient, Message msg) throws SendingMessageException {
+    public void sendToClient(String recipient, ServerMessage msg) throws SendingMessageException {
         sendToClient(getFromString(recipient), msg);
     }
 
@@ -166,10 +166,10 @@ public class Server {
      * @return the ClientHandlerOld whose username corresponds to the given String, <code>null</code> if
      * there is no such ClientHandlerOld.
      */
-    private ClientHandlerOld getFromString(String username) {
+    private ClientHandler getFromString(String username) {
         lock.readLock().lock();
         try {
-            for (ClientHandlerOld ch : clientHandlerOlds) {
+            for (ClientHandler ch : clientHandlers) {
                 if (username.equals(ch.getUsername())) return ch;
             }
         } finally {
@@ -182,19 +182,20 @@ public class Server {
      * Removes a ClientHandlerOld from the list of ClientHandlers.
      * @param handler the ClientHandlerOld to be removed.
      */
-    public void clientDisconnected(ClientHandlerOld handler) {
+    public void clientDisconnected(ClientHandler handler) {
         String username = handler.getUsername();
         lock.writeLock().lock();
         try {
-            clientHandlerOlds.remove(handler);
+            clientHandlers.remove(handler);
         } finally {
             lock.writeLock().unlock();
         }
-        try {
-            sendToAll(new InfoMessage(MessageType.INFO, Info.CLIENT_DISCONNECTED, new String[]{username}));
-        } catch (SendingMessageException e) {
-            System.err.println(e.getMessage());
-        }
+        // TODO: broadcast client disconnected
+//        try {
+//            sendToAll(new InfoMessage(MessageType.INFO, Info.CLIENT_DISCONNECTED, new String[]{username}));
+//        } catch (SendingMessageException e) {
+//            System.err.println(e.getMessage());
+//        }
     }
 
     /**
@@ -203,8 +204,8 @@ public class Server {
      */
     public void shutdown(int status) {
         try {
-            for (ClientHandlerOld gch : clientHandlerOlds) {
-                gch.disconnect();
+            for (ClientHandler ch : clientHandlers) {
+                ch.disconnect();
             }
             serverSocket.close();
         } catch (IOException e) {
@@ -214,7 +215,7 @@ public class Server {
     }
 
     public static void main(String[] args) {
-        Server test = new Server(Utils.PORT);
+        DwarsServer test = new DwarsServer(Utils.PORT);
         test.run();
     }
 

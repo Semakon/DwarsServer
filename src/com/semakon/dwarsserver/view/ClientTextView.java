@@ -26,16 +26,16 @@ public class ClientTextView extends Thread implements ClientView {
                 String[] split = scanner.nextLine().split(" ");
                 if (split.length >= 1) {
                     switch (split[0]) {
-                        case Command.MESSAGE:
+                        case CommandOld.MESSAGE:
                             handleMessage(split);
                             break;
-                        case Command.BROADCAST:
+                        case CommandOld.BROADCAST:
                             handleBroadcast(split);
                             break;
-                        case Command.USERNAME:
+                        case CommandOld.USERNAME:
                             handleUsername(split);
                             break;
-                        case Command.HELP:
+                        case CommandOld.HELP:
                             handleHelp(split);
                             break;
                         default:
@@ -48,33 +48,33 @@ public class ClientTextView extends Thread implements ClientView {
 
     private void handleHelp(String[] args) {
         if (args.length == 1) {
-            displayMessage(Command.help());
+            displayMessage(CommandOld.help());
         } else if (args.length == 2){
             switch (args[1]) {
-                case Command.HELP:
-                    displayMessage("Usage: " + Command.HELP_USAGE);
+                case CommandOld.HELP:
+                    displayMessage("Usage: " + CommandOld.HELP_USAGE);
                     break;
-                case Command.MESSAGE:
-                    displayMessage("Usage: " + Command.MESSAGE_USAGE);
+                case CommandOld.MESSAGE:
+                    displayMessage("Usage: " + CommandOld.MESSAGE_USAGE);
                     break;
-                case Command.BROADCAST:
-                    displayMessage("Usage: " + Command.BROADCAST_USAGE);
+                case CommandOld.BROADCAST:
+                    displayMessage("Usage: " + CommandOld.BROADCAST_USAGE);
                     break;
-                case Command.USERNAME:
-                    displayMessage("Usage: " + Command.USERNAME_USAGE);
+                case CommandOld.USERNAME:
+                    displayMessage("Usage: " + CommandOld.USERNAME_USAGE);
                     break;
                 default:
-                    displayError("Not a command, use \"" + Command.HELP + "\"");
+                    displayError("Not a command, use \"" + CommandOld.HELP + "\"");
             }
         } else {
-            displayError("Usage: " + Command.HELP_USAGE);
+            displayError("Usage: " + CommandOld.HELP_USAGE);
         }
     }
 
     private void handleUsername(String[] args) {
         // Check for enough arguments
         if (args.length < 2) {
-            displayError("Usage: " + Command.USERNAME_USAGE);
+            displayError("Usage: " + CommandOld.USERNAME_USAGE);
             return;
         }
         // Create new info message
@@ -88,7 +88,7 @@ public class ClientTextView extends Thread implements ClientView {
     private void handleBroadcast(String[] args) {
         // Check for enough arguments
         if (args.length < 2) {
-            displayError("Usage: " + Command.BROADCAST_USAGE);
+            displayError("Usage: " + CommandOld.BROADCAST_USAGE);
             return;
         }
         // Create new personal message
@@ -107,7 +107,7 @@ public class ClientTextView extends Thread implements ClientView {
     private void handleMessage(String[] args) {
         // Check for enough arguments
         if (args.length < 3) {
-            displayError("Usage: " + Command.MESSAGE_USAGE);
+            displayError("Usage: " + CommandOld.MESSAGE_USAGE);
             return;
         }
         // Create new personal message

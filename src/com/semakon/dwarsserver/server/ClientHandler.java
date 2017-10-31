@@ -2,14 +2,28 @@ package com.semakon.dwarsserver.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import com.semakon.dwarsserver.exceptions.InvalidUsernameException;
 import com.semakon.dwarsserver.exceptions.SendingMessageException;
+import com.semakon.dwarsserver.model.anytimers.Anytimer;
+import com.semakon.dwarsserver.model.ranking.RankingList;
+import com.semakon.dwarsserver.protocol.client.ClientMessage;
+import com.semakon.dwarsserver.protocol.client.ClientMessageDeserializer;
+import com.semakon.dwarsserver.protocol.client.LoginAttempt;
+import com.semakon.dwarsserver.protocol.client.anytimers.AddAnytimer;
+import com.semakon.dwarsserver.protocol.client.anytimers.EditAnytimer;
+import com.semakon.dwarsserver.protocol.client.anytimers.QueryAnytimers;
+import com.semakon.dwarsserver.protocol.client.anytimers.RemoveAnytimer;
+import com.semakon.dwarsserver.protocol.client.rankings.*;
 import com.semakon.dwarsserver.protocol.old.*;
+import com.semakon.dwarsserver.protocol.server.ServerMessage;
+import com.semakon.dwarsserver.protocol.server.ServerMessageDeserializer;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Author:  M.P. de Vries
@@ -17,10 +31,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class ClientHandler extends Thread {
 
-    private int uuid;
+    // TODO: assign uid
+    private int uid;
     private String username;
 
-    private Server server;
+    private DwarsServer server;
 
     private Socket socket;
     private PrintWriter out;
@@ -28,45 +43,55 @@ public class ClientHandler extends Thread {
 
     private Gson gson;
 
-    private ReadWriteLock lock = new ReentrantReadWriteLock();
-
-    public ClientHandler(int uuid, Server server, Socket socket) {
-        this.uuid = uuid;
+    public ClientHandler(DwarsServer server, Socket socket) {
         this.server = server;
         this.socket = socket;
 
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(Message.class, new MessageDeserializer());
+        builder.registerTypeAdapter(ClientMessage.class, new ClientMessageDeserializer());
         gson = builder.create();
     }
 
     public void run() {
         try {
-
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             String input;
             while ((input = in.readLine()) != null) {
-                Message msg = gson.fromJson(input, Message.class);
+                ClientMessage msg = gson.fromJson(input, ClientMessage.class);
+
+                // debug
                 System.out.println("Received: " + msg);
+
                 if (msg.getType() == null) {
                     System.err.println("Message type is undefined");
                     continue;
                 }
                 switch(msg.getType()) {
-                    case PERSONAL:
-                        handlePersonalMessage((PersonalMessage)msg);
+                    case LOGIN_ATTEMPT:
                         break;
-                    case BROADCAST:
-                        handleBroadcastMessage((BroadcastMessage) msg);
+                    case QUERY_ANYTIMERS:
                         break;
-                    case ERROR:
-                        handleErrorMessage((ErrorMessage)msg);
+                    case ADD_ANYTIMER:
                         break;
-                    case INFO:
-                        handleInfoMessage((InfoMessage)msg);
+                    case REMOVE_ANYTIMER:
                         break;
+                    case EDIT_ANYTIMER:
+                        break;
+                    case QUERY_RANKING_LISTS:
+                        break;
+                    case QUERY_RANKING_LIST:
+                        break;
+                    case ADD_RANKING_LIST:
+                        break;
+                    case REMOVE_RANKING_LIST:
+                        break;
+                    case EDIT_RANKING_LIST:
+                        break;
+                    default:
+                        System.err.println("Message type \"" + msg.getType()
+                                + "\" is undefined in " + getClass().getSimpleName());
                 }
             }
         } catch (IOException e) {
@@ -75,77 +100,17 @@ public class ClientHandler extends Thread {
         }
     }
 
-    private void handlePersonalMessage(PersonalMessage msg) {
-        try {
-            server.sendToClient(msg.getRecipient(), msg);
-        } catch (SendingMessageException e) {
-            System.err.println(e.getMessage());
-            sendMessage(new ErrorMessage(MessageType.ERROR, Info.INVALID_COMMAND, e.getMessage()));
-        }
-    }
 
-    private void handleBroadcastMessage(BroadcastMessage msg) {
-        try {
-            server.sendToAll(msg);
-        } catch (SendingMessageException e) {
-            // Should not occur
-            System.err.println(e.getMessage());
-            sendMessage(new ErrorMessage(MessageType.ERROR, Info.INVALID_COMMAND, e.getMessage()));
-        }
-    }
-
-    private void handleErrorMessage(ErrorMessage msg) {
-        System.err.println("Received error from " + username + ": " + msg);
-    }
-
-    private void handleInfoMessage(InfoMessage msg) {
-        switch (msg.getMessage()) {
-            case Info.USERNAME:
-                String[] args = msg.getArgs();
-                if (args != null && args.length >= 1) {
-                    String username = args[0];
-                    try {
-                        server.validateUsername(username);
-                        // Username accepted
-                        this.username = username;
-                        sendMessage(new InfoMessage(
-                                MessageType.INFO, Info.VALID_USERNAME, new String[]{username}));
-
-                        // Send broadcast to all clients
-                        server.sendToAll(new InfoMessage(
-                                MessageType.INFO, Info.CLIENT_CONNECTED, new String[]{username}));
-                    } catch (InvalidUsernameException e) {
-                        // Username not accepted
-                        System.err.println(socket.getInetAddress()
-                                + " chose an invalid username: \"" + username + "\"");
-                        sendMessage(new ErrorMessage(
-                                MessageType.ERROR, Info.INVALID_USERNAME, e.getMessage()));
-                    } catch (SendingMessageException e) {
-                        System.err.println(e.getMessage());
-                    }
-
-                } else {
-                    sendMessage(new ErrorMessage(
-                            MessageType.ERROR, Info.INVALID_COMMAND, "Not enough arguments"));
-                }
-                break;
-            default:
-                System.err.println("Unknown info message");
-                sendMessage(new ErrorMessage(
-                        MessageType.ERROR, Info.INVALID_COMMAND, "Unknown info message"));
-        }
-    }
 
     /**
      * Encodes a Message object into Json and sends it to the output.
      * @param message the Message object sent.
      */
-    public void sendMessage(Message message) {
+    public void sendMessage(ServerMessage message) {
         out.println(gson.toJson(message));
     }
 
     public void disconnect() throws IOException {
-        // TODO: broadcast client disconnected
         out.close();
         in.close();
         socket.close();
@@ -154,11 +119,11 @@ public class ClientHandler extends Thread {
 
     @Override
     public boolean equals(Object obj) {
-        return this == obj || obj instanceof ClientHandler && this.uuid == ((ClientHandler) obj).getUuid();
+        return this == obj || obj instanceof ClientHandler && this.uid == ((ClientHandler) obj).getUid();
     }
 
-    public int getUuid() {
-        return this.uuid;
+    public int getUid() {
+        return this.uid;
     }
 
     public String getUsername() {

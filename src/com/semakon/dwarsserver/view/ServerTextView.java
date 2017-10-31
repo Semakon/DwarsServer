@@ -1,7 +1,5 @@
 package com.semakon.dwarsserver.view;
 
-import com.semakon.dwarsserver.server.Server;
-
 import java.util.Scanner;
 
 /**
@@ -10,27 +8,32 @@ import java.util.Scanner;
  */
 public class ServerTextView extends Thread implements ServerView {
 
-    private Server server;
     private boolean stop;
 
-    public ServerTextView(Server server) {
-        this.server = server;
+    public ServerTextView() {
         stop = false;
     }
 
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        try {
-            while (!stop) {
-                if (scanner.hasNextLine()) {
-                    String[] split = scanner.nextLine().split(" ");
-                    // TODO: handle input
+        while (!stop) {
+            if (scanner.hasNextLine()) {
+                String[] split = scanner.nextLine().split(" ");
+                if (split.length >= 1) {
+                    switch (split[0]) {
+                        // TODO: handle cases
+                        case Command.HELP:
+                        case Command.SHUTDOWN:
+                        case Command.KICK:
+                        case Command.MESSAGE:
+                        case Command.BROADCAST:
+                            break;
+                        default:
+                            displayError("Unknown command - Type "
+                                    + Command.HELP + " for a list of commands");
+                    }
                 }
             }
-            // Sleep to avoid spam
-            sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 

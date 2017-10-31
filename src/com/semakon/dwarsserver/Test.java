@@ -16,7 +16,7 @@ public class Test {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
 
-        RankingList list = new RankingList("vo");
+        RankingList list = new RankingList(1, "vo");
         list.addRanking(new Ranking(new User(1, "martijn"), 10));
         list.addRanking(new Ranking(new User(2, "coen"), -10));
         list.addRanking(new Ranking(new User(3, "jelly"), 1));

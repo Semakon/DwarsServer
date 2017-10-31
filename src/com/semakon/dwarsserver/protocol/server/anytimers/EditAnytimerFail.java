@@ -11,6 +11,7 @@ import com.semakon.dwarsserver.protocol.server.ServerMessageType;
 public class EditAnytimerFail extends ServerMessage {
 
     private Anytimer anytimer;
+    private String reason;
 
     public EditAnytimerFail(ServerMessageType type) {
         super(type);
@@ -22,6 +23,14 @@ public class EditAnytimerFail extends ServerMessage {
 
     public void setAnytimer(Anytimer anytimer) {
         this.anytimer = anytimer;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
 }
