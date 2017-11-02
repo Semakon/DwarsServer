@@ -6,6 +6,9 @@ import com.semakon.dwarsserver.Utils;
 import com.semakon.dwarsserver.protocol.old.*;
 import com.semakon.dwarsserver.view.ClientTextView;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,6 +35,7 @@ public class Client {
 
     private ClientTextView view;
 
+    @Deprecated
     public Client(String host, int port) {
         this.host = host;
         this.port = port;
@@ -80,20 +84,20 @@ public class Client {
                     view.displayError("Message type is undefined");
                     continue;
                 }
-                switch(msg.getType()) {
+                switch (msg.getType()) {
                     case PERSONAL:
                         if (username == null) continue;
-                        handlePersonalMessage((PersonalMessage)msg);
+                        handlePersonalMessage((PersonalMessage) msg);
                         break;
                     case BROADCAST:
                         if (username == null) continue;
                         handleBroadcastMessage((BroadcastMessage) msg);
                         break;
                     case ERROR:
-                        handleErrorMessage((ErrorMessage)msg);
+                        handleErrorMessage((ErrorMessage) msg);
                         break;
                     case INFO:
-                        handleInfoMessage((InfoMessage)msg);
+                        handleInfoMessage((InfoMessage) msg);
                         break;
                 }
             }

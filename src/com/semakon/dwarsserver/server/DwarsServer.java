@@ -11,6 +11,9 @@ import com.semakon.dwarsserver.protocol.server.ServerMessage;
 import com.semakon.dwarsserver.view.ServerTextView;
 import com.semakon.dwarsserver.view.ServerView;
 
+import javax.net.ServerSocketFactory;
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -203,6 +206,7 @@ public class DwarsServer {
      * @param status the status the program terminates with.
      */
     public void shutdown(int status) {
+        lock.writeLock().lock();
         try {
             for (ClientHandler ch : clientHandlers) {
                 ch.disconnect();
@@ -210,6 +214,8 @@ public class DwarsServer {
             serverSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            lock.writeLock().unlock();
         }
         System.exit(status);
     }

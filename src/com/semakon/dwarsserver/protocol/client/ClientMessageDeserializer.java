@@ -7,6 +7,7 @@ import com.semakon.dwarsserver.protocol.client.anytimers.AddAnytimer;
 import com.semakon.dwarsserver.protocol.client.anytimers.EditAnytimer;
 import com.semakon.dwarsserver.protocol.client.anytimers.QueryAnytimers;
 import com.semakon.dwarsserver.protocol.client.anytimers.RemoveAnytimer;
+import com.semakon.dwarsserver.protocol.client.login.LoginAttempt;
 import com.semakon.dwarsserver.protocol.client.rankings.*;
 
 import java.lang.reflect.Type;

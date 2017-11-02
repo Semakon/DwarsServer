@@ -2,28 +2,21 @@ package com.semakon.dwarsserver.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
-import com.semakon.dwarsserver.exceptions.InvalidUsernameException;
+import com.semakon.dwarsserver.exceptions.InsufficientPermissionsException;
 import com.semakon.dwarsserver.exceptions.SendingMessageException;
-import com.semakon.dwarsserver.model.anytimers.Anytimer;
-import com.semakon.dwarsserver.model.ranking.RankingList;
+import com.semakon.dwarsserver.model.User;
+import com.semakon.dwarsserver.protocol.client.ClientMessageHandler;
 import com.semakon.dwarsserver.protocol.client.ClientMessage;
 import com.semakon.dwarsserver.protocol.client.ClientMessageDeserializer;
-import com.semakon.dwarsserver.protocol.client.LoginAttempt;
-import com.semakon.dwarsserver.protocol.client.anytimers.AddAnytimer;
-import com.semakon.dwarsserver.protocol.client.anytimers.EditAnytimer;
-import com.semakon.dwarsserver.protocol.client.anytimers.QueryAnytimers;
-import com.semakon.dwarsserver.protocol.client.anytimers.RemoveAnytimer;
-import com.semakon.dwarsserver.protocol.client.rankings.*;
-import com.semakon.dwarsserver.protocol.old.*;
 import com.semakon.dwarsserver.protocol.server.ServerMessage;
-import com.semakon.dwarsserver.protocol.server.ServerMessageDeserializer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Author:  M.P. de Vries
@@ -31,27 +24,36 @@ import java.net.Socket;
  */
 public class ClientHandler extends Thread {
 
-    // TODO: assign uid
-    private int uid;
-    private String username;
+    // User details
+    // TODO: assign user
+    private User user;
 
+    // Permission level
+    private int permissionLevel = 0;
+
+    // Dwars server objects
     private DwarsServer server;
+    private ClientMessageHandler handler;
 
+    // Connection tools
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
-
     private Gson gson;
 
     public ClientHandler(DwarsServer server, Socket socket) {
         this.server = server;
         this.socket = socket;
+        this.handler = new ClientMessageHandler(this);
 
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(ClientMessage.class, new ClientMessageDeserializer());
         gson = builder.create();
     }
 
+    /**
+     * Handles input from client.
+     */
     public void run() {
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
@@ -64,70 +66,63 @@ public class ClientHandler extends Thread {
                 // debug
                 System.out.println("Received: " + msg);
 
-                if (msg.getType() == null) {
-                    System.err.println("Message type is undefined");
-                    continue;
-                }
-                switch(msg.getType()) {
-                    case LOGIN_ATTEMPT:
-                        break;
-                    case QUERY_ANYTIMERS:
-                        break;
-                    case ADD_ANYTIMER:
-                        break;
-                    case REMOVE_ANYTIMER:
-                        break;
-                    case EDIT_ANYTIMER:
-                        break;
-                    case QUERY_RANKING_LISTS:
-                        break;
-                    case QUERY_RANKING_LIST:
-                        break;
-                    case ADD_RANKING_LIST:
-                        break;
-                    case REMOVE_RANKING_LIST:
-                        break;
-                    case EDIT_RANKING_LIST:
-                        break;
-                    default:
-                        System.err.println("Message type \"" + msg.getType()
-                                + "\" is undefined in " + getClass().getSimpleName());
+                try {
+                    handler.handle(msg);
+                } catch (InsufficientPermissionsException e) {
+                    System.err.println(e.getMessage());
+                    // TODO: create "InsufficientPermissions" ServerMessage and send to client
                 }
             }
         } catch (IOException e) {
-            System.err.println((username != null ? username : "Client") + " disconnected");
+            System.err.println((user != null ? getUsername() : "Client") + " disconnected");
             server.clientDisconnected(this);
         }
     }
 
-
-
     /**
-     * Encodes a Message object into Json and sends it to the output.
-     * @param message the Message object sent.
+     * Encodes a ServerMessage object into Json and sends it to the output.
+     * @param msg the ServerMessage object sent.
      */
-    public void sendMessage(ServerMessage message) {
-        out.println(gson.toJson(message));
+    public void sendMessage(ServerMessage msg) {
+        out.println(gson.toJson(msg));
     }
 
+    /**
+     * Disconnects the server from the client and closes all appropriate channels.
+     */
     public void disconnect() throws IOException {
-        out.close();
-        in.close();
-        socket.close();
+        try {
+            in.close();
+            out.close();
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         System.out.println("Disconnected from client");
+    }
+
+    public int getPermissionLevel() {
+        return permissionLevel;
+    }
+
+    public void setPermissionLevel(int permissionLevel) {
+        this.permissionLevel = permissionLevel;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return this == obj || obj instanceof ClientHandler && this.uid == ((ClientHandler) obj).getUid();
+        return this == obj || obj instanceof ClientHandler && getUid() == ((ClientHandler) obj).getUid();
     }
 
     public int getUid() {
-        return this.uid;
+        return user.getUid();
     }
 
     public String getUsername() {
-        return this.username;
+        return user.getUsername();
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

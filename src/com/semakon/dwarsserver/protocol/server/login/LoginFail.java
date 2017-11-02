@@ -1,4 +1,7 @@
-package com.semakon.dwarsserver.protocol.server;
+package com.semakon.dwarsserver.protocol.server.login;
+
+import com.semakon.dwarsserver.protocol.server.ServerMessage;
+import com.semakon.dwarsserver.protocol.server.ServerMessageType;
 
 /**
  * Author:  M.P. de Vries

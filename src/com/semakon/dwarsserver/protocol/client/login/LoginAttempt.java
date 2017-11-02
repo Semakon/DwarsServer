@@ -1,4 +1,4 @@
-package com.semakon.dwarsserver.protocol.client;
+package com.semakon.dwarsserver.protocol.client.login;
 
 import com.semakon.dwarsserver.protocol.client.ClientMessage;
 import com.semakon.dwarsserver.protocol.client.ClientMessageType;

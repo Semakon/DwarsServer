@@ -1,11 +1,14 @@
 package com.semakon.dwarsserver.protocol.server;
 
 import com.google.gson.*;
+import com.semakon.dwarsserver.model.User;
 import com.semakon.dwarsserver.model.anytimers.Anytimer;
 import com.semakon.dwarsserver.model.ranking.RankingList;
 import com.semakon.dwarsserver.protocol.server.anytimers.EditAnytimerFail;
 import com.semakon.dwarsserver.protocol.server.anytimers.EditAnytimerSuccess;
 import com.semakon.dwarsserver.protocol.server.anytimers.ResponseAnytimers;
+import com.semakon.dwarsserver.protocol.server.login.LoginFail;
+import com.semakon.dwarsserver.protocol.server.login.LoginSuccess;
 import com.semakon.dwarsserver.protocol.server.rankings.EditRankingListFail;
 import com.semakon.dwarsserver.protocol.server.rankings.EditRankingListSuccess;
 import com.semakon.dwarsserver.protocol.server.rankings.ResponseRankingList;
@@ -31,6 +34,7 @@ public class ServerMessageDeserializer implements JsonDeserializer<ServerMessage
         switch (type) {
             case LOGIN_ATTEMPT_SUCCES:
                 msg = new LoginSuccess(type);
+                ((LoginSuccess)msg).setUser(context.deserialize(jsonObject.get("user"), User.class));
                 return msg;
             case LOGIN_ATTEMPT_FAIL:
                 msg = new LoginFail(type);

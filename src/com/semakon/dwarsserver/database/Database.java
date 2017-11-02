@@ -1,5 +1,11 @@
 package com.semakon.dwarsserver.database;
 
+import com.semakon.dwarsserver.model.User;
+import com.semakon.dwarsserver.model.anytimers.Anytimer;
+import com.semakon.dwarsserver.model.ranking.RankingList;
+
+import java.util.List;
+
 /**
  * Interface for database classes to ensure flexibility.
  *
@@ -8,4 +14,15 @@ package com.semakon.dwarsserver.database;
  */
 public interface Database {
 
+    List<User> getUsers();
+
+    User getUserByUid(int uid);
+
+    String getPasswordByUid(int uid);
+
+    List<Anytimer> getAnytimers();
+
+    List<RankingList> getRankingLists();
+
+    RankingList getRankingListByRlid(int rlid);
 }
