@@ -1,16 +1,26 @@
 package com.semakon.dwarsserver.protocol.client;
 
+import com.semakon.dwarsserver.database.SqlDatabase;
 import com.semakon.dwarsserver.exceptions.InsufficientPermissionsException;
 import com.semakon.dwarsserver.exceptions.LoginException;
 import com.semakon.dwarsserver.model.User;
+import com.semakon.dwarsserver.model.ranking.RankingList;
+import com.semakon.dwarsserver.protocol.client.anytimers.AddAnytimer;
+import com.semakon.dwarsserver.protocol.client.anytimers.EditAnytimer;
+import com.semakon.dwarsserver.protocol.client.anytimers.QueryAnytimers;
+import com.semakon.dwarsserver.protocol.client.anytimers.RemoveAnytimer;
 import com.semakon.dwarsserver.protocol.client.login.LoginAttempt;
+import com.semakon.dwarsserver.protocol.client.rankings.*;
 import com.semakon.dwarsserver.protocol.server.ServerMessageType;
 import com.semakon.dwarsserver.protocol.server.login.LoginFail;
 import com.semakon.dwarsserver.protocol.server.login.LoginSuccess;
+import com.semakon.dwarsserver.protocol.server.rankings.ResponseRankingLists;
 import com.semakon.dwarsserver.security.LoginManager;
 import com.semakon.dwarsserver.security.Perm;
 import com.semakon.dwarsserver.security.PermissionManager;
 import com.semakon.dwarsserver.server.ClientHandler;
+
+import java.util.List;
 
 /**
  * Author:  M.P. de Vries
@@ -30,67 +40,77 @@ public class ClientMessageHandler {
             System.err.println("Message type is undefined");
             return;
         }
+        // TODO; handle cast exception by returning error message to client
         switch (type) {
             case LOGIN_ATTEMPT:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.GUEST)) {
                     throw new InsufficientPermissionsException();
                 }
-                handleLoginAttempt(msg);
+                handleLoginAttempt((LoginAttempt) msg);
                 break;
             case QUERY_ANYTIMERS:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.GUEST)) {
                     throw new InsufficientPermissionsException();
                 }
+                handleQueryAnytimers((QueryAnytimers) msg);
                 break;
             case ADD_ANYTIMER:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.USER)) {
                     throw new InsufficientPermissionsException();
                 }
+                handleAddAnytimer((AddAnytimer) msg);
                 break;
             case REMOVE_ANYTIMER:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.USER)) {
                     throw new InsufficientPermissionsException();
                 }
+                handleRemoveAnytimer((RemoveAnytimer) msg);
                 break;
             case EDIT_ANYTIMER:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.USER)) {
                     throw new InsufficientPermissionsException();
                 }
+                handleEditAnytimer((EditAnytimer) msg);
                 break;
             case QUERY_RANKING_LISTS:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.GUEST)) {
                     throw new InsufficientPermissionsException();
                 }
+                handleQueryRankingLists((QueryRankingLists) msg);
                 break;
             case QUERY_RANKING_LIST:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.GUEST)) {
                     throw new InsufficientPermissionsException();
                 }
+                handleQueryRankingList((QueryRankingList) msg);
                 break;
             case ADD_RANKING_LIST:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.USER)) {
                     throw new InsufficientPermissionsException();
                 }
+                handleAddRankingList((AddRankingList) msg);
                 break;
             case REMOVE_RANKING_LIST:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.USER)) {
                     throw new InsufficientPermissionsException();
                 }
+                handleRemoveRankingList((RemoveRankingList) msg);
                 break;
             case EDIT_RANKING_LIST:
                 // Check if user has sufficient permissions
                 if (PermissionManager.hasPermission(clientHandler, Perm.USER)) {
                     throw new InsufficientPermissionsException();
                 }
+                handleEditRankingList((EditRankingList) msg);
                 break;
             default:
                 System.err.println(
@@ -98,11 +118,10 @@ public class ClientMessageHandler {
         }
     }
 
-    private void handleLoginAttempt(ClientMessage msg) {
-        // Cast msg to appropriate ServerMessageType
-        LoginAttempt loginMsg = (LoginAttempt)msg;
-        String username = loginMsg.getUsername();
-        String password = loginMsg.getPassword();
+    private void handleLoginAttempt(LoginAttempt msg) {
+        // Get related information from message
+        String username = msg.getUsername();
+        String password = msg.getPassword();
         try {
             // Evaluate login attempt
             User user = LoginManager.getUser(username, password);
@@ -126,6 +145,51 @@ public class ClientMessageHandler {
             response.setReason(e.getMessage());
             clientHandler.sendMessage(response);
         }
+    }
+
+    private void handleQueryAnytimers(QueryAnytimers msg) {
+        // Get related information from msg
+        int uid = msg.getUid();
+        // TODO: give user list of anytimers
+    }
+
+    private void handleAddAnytimer(AddAnytimer msg) {
+
+    }
+
+    private void handleRemoveAnytimer(RemoveAnytimer msg) {
+
+    }
+
+    private void handleEditAnytimer(EditAnytimer msg) {
+
+    }
+
+    private void handleQueryRankingLists(QueryRankingLists msg) {
+        // Get all RankingLists from database
+        RankingList[] rankingLists = SqlDatabase.getInstance().getRankingLists();
+
+        // Send rankingLists to client
+        ResponseRankingLists response = new ResponseRankingLists(ServerMessageType.RESPONSE_RANKING_LISTS);
+        response.setRankingLists(rankingLists);
+        clientHandler.sendMessage(response);
+        // TODO: handle query exception
+    }
+
+    private void handleQueryRankingList(QueryRankingList msg) {
+
+    }
+
+    private void handleAddRankingList(AddRankingList msg) {
+
+    }
+
+    private void handleRemoveRankingList(RemoveRankingList msg) {
+
+    }
+
+    private void handleEditRankingList(EditRankingList msg) {
+
     }
 
 }

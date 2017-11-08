@@ -32,7 +32,7 @@ public class FileDatabase implements Database {
     }
 
     @Override
-    public List<RankingList> getRankingLists() {
+    public RankingList[] getRankingLists() {
         return null;
     }
 

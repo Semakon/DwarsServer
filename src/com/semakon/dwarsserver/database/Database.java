@@ -22,7 +22,7 @@ public interface Database {
 
     List<Anytimer> getAnytimers();
 
-    List<RankingList> getRankingLists();
+    RankingList[] getRankingLists();
 
     RankingList getRankingListByRlid(int rlid);
 }

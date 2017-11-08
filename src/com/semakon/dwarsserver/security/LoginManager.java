@@ -29,6 +29,7 @@ public class LoginManager {
         }
         if (user == null) throw new LoginException();
 
+        // TODO: hash password
         // Check whether password corresponds to password in database
         String databasePassword = SqlDatabase.getInstance().getPasswordByUid(user.getUid());
         if (password.equals(databasePassword)) {
